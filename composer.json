@@ -1,6 +1,6 @@
 {
     "name": "udokmeci/yii2-lazy-process",
-    "description": "This extensions mimics a queue to run after sending response.",
+    "description": "This extensions runs yii2 queue after sending response.",
     "type": "yii2-extension",
     "keywords": ["yii2","extension"," lazy-process"],
     "license": "Apache-2.0",
