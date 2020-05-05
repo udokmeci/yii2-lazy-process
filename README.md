@@ -25,7 +25,13 @@ to the require section of your `composer.json` file.
 Usage
 -----
 
-Once the extension is installed, simply use it in your code by  :
+Once the extension is installed, attach behaviour to your reponse in config like :
 
 ```php
-<?= \udokmeci\lazy\AutoloadExample::widget(); ?>```
+...
+	'response'=>[
+		...
+        'as queueRunner'=>'udokmeci\lazy\QueueRunnerBehavior'
+    ],
+...
+```
