@@ -2,6 +2,7 @@
 
 namespace udokmeci\lazy;
 use yii\web\Response;
+use Yii;
 
 /**
  * This is just an example.
@@ -12,45 +13,39 @@ class QueueRunnerBehavior extends \yii\base\Behavior
     public function attach($owner)
     {
 
-    	$res= parent::attach($owner);
-    	$owner->on(Response::EVENT_AFTER_PREPARE, [$this,'addHeaders']);
-    	return $res;
-        
-    }
+        $res= parent::attach($owner);
+        $owner->on(Response::EVENT_AFTER_SEND, [$this,'runQueue']);
 
-    public function addHeaders($event)
-    {
-    	if($this->owner->format!='html'){
-    		return;
-    	}
-    	$this->owner->on(Response::EVENT_AFTER_SEND, [$this,'runQueue']);
-    	// return ;
-    	$this->owner->headers->add('Connection', 'Close');
-    	$this->owner->headers->add('Content-Length', strlen($this->owner->content));
+        return $res;
+        
     }
 
     public function runQueue($event)
     {
-    	$this->closeConnection($event);
-    	\Yii::$app->queue->run(false);
+       $this->closeConnection($event);
+       Yii::$app->queue->run(false);
     }
 
     public function closeConnection($event)
     {
+
         if (is_callable('fastcgi_finish_request')) {
             session_write_close();
             fastcgi_finish_request();
-            return;
+            return true;
         }
-
-        if (session_id()) {
-            session_write_close();
+        try {
+            if (session_id()) {
+                session_write_close();
+            }
+         
+            ignore_user_abort(true);
+            ob_end_flush();
+            ob_flush();
+            flush();
+        } catch (\Exception $e) {
+            return false;
         }
-     
-        ignore_user_abort(true);
-        ob_end_flush();
-        ob_flush();
-        flush();
 
     }
 }
